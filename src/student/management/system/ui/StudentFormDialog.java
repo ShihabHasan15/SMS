@@ -18,8 +18,8 @@ public class StudentFormDialog extends JDialog {
     private final JTextField tfEmail      = styledField();
     private final JTextField tfPhone      = styledField();
     private final JComboBox<String> cbDept;
-    private final JSpinner   spYear;
-    private final JSpinner   spGpa;
+    private final JTextField tfYear = styledField();
+    private final JTextField tfGpa  = styledField();
 
     private Student result;   
     private final boolean editMode;
@@ -37,22 +37,22 @@ public class StudentFormDialog extends JDialog {
         cbDept = new JComboBox<>(depts);
         cbDept.setFont(new Font("Segoe UI", Font.PLAIN, 13));
 
-        spYear = new JSpinner(new SpinnerNumberModel(
-        Integer.valueOf(1),   
-        Integer.valueOf(1),   
-        Integer.valueOf(6),   
-        Integer.valueOf(1)    
-        ));
-        spGpa = new JSpinner(new SpinnerNumberModel(
-        Double.valueOf(0.00),
-        Double.valueOf(0.00),
-        Double.valueOf(4.00),
-        Double.valueOf(0.01)
-        ));
-        ((JSpinner.DefaultEditor) spGpa.getEditor()).getTextField()
-                .setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(
-                        new javax.swing.text.NumberFormatter(
-                                new java.text.DecimalFormat("0.00"))));
+//        spYear = new JSpinner(new SpinnerNumberModel(
+//        Integer.valueOf(1),   
+//        Integer.valueOf(1),   
+//        Integer.valueOf(6),   
+//        Integer.valueOf(1)    
+//        ));
+//        spGpa = new JSpinner(new SpinnerNumberModel(
+//        Double.valueOf(0.00),
+//        Double.valueOf(0.00),
+//        Double.valueOf(4.00),
+//        Double.valueOf(0.01)
+//        ));
+//        ((JSpinner.DefaultEditor) spGpa.getEditor()).getTextField()
+//                .setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(
+//                        new javax.swing.text.NumberFormatter(
+//                                new java.text.DecimalFormat("0.00"))));
 
         if (existing != null) prefill(existing);
 
@@ -90,8 +90,8 @@ public class StudentFormDialog extends JDialog {
         addRow(form, lc, fc, row++, "Email *",       tfEmail);
         addRow(form, lc, fc, row++, "Phone",         tfPhone);
         addRow(form, lc, fc, row++, "Department *",  cbDept);
-        addRow(form, lc, fc, row++, "Year *",        spYear);
-        addRow(form, lc, fc, row++, "GPA",           spGpa);
+        addRow(form, lc, fc, row++, "Year *", tfYear);
+        addRow(form, lc, fc, row++, "GPA", tfGpa);
 
         root.add(form, BorderLayout.CENTER);
 
@@ -132,9 +132,31 @@ public class StudentFormDialog extends JDialog {
         String em   = tfEmail.getText().trim();
         String ph   = tfPhone.getText().trim();
         String dept = (String) cbDept.getSelectedItem();
-        int    year = ((Number) spYear.getValue()).intValue();
-        double gpa  = ((Number) spGpa.getValue()).doubleValue();
+        int year;
+        double gpa;
 
+        try {
+           
+            year = Integer.parseInt(tfYear.getText().trim());
+            gpa = Double.parseDouble(tfGpa.getText().trim());
+         
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this,
+            "Year and GPA must be valid numbers.",
+            "Validation Error",
+            JOptionPane.WARNING_MESSAGE);
+        return;
+        }
+
+        if (gpa < 0.0 || gpa > 4.0) {
+                JOptionPane.showMessageDialog(this,
+                "GPA must be between 0.00 and 4.00.",
+                "Validation Error",
+                JOptionPane.WARNING_MESSAGE);
+            return;
+            }
+        
+        
         if (sid.isEmpty() || fn.isEmpty() || ln.isEmpty() || em.isEmpty()) {
             JOptionPane.showMessageDialog(this,
                 "Fields marked with * are required.", "Validation Error",
@@ -160,8 +182,8 @@ public class StudentFormDialog extends JDialog {
         tfEmail    .setText(s.getEmail());
         tfPhone    .setText(s.getPhone() != null ? s.getPhone() : "");
         cbDept     .setSelectedItem(s.getDepartment());
-        spYear     .setValue(s.getYear());
-        spGpa      .setValue(s.getGpa());
+        tfYear.setText(String.valueOf(s.getYear()));
+        tfGpa.setText(String.valueOf(s.getGpa()));
     }
 
     public Student getResult() { return result; }
